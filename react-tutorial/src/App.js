@@ -1,44 +1,67 @@
+import { useEffect, useState } from "react";
 import './App.css';
-import { useState, useEffect } from "react";
+import SearchIcon from './search.svg';
+import MovieCard from "./Components/MovieCard";
 
-const Person = ({name, age}) => {
-  return (
-      <>
-        <h1>name: {name}</h1>
-        <h2>age: {age}</h2>
-      </>
-  )
-}
+const API_URL = 'https://www.omdbapi.com?apikey=9826e371';
 
 const App = () => {
-  // You can have any JavaScript code here
-  const name = 'Jonathan Ameri';
-  const [counter, setCounter] = useState(0);
 
-  // Called when the component is mounted
-  // The second parameter is an array of variables that will trigger the useEffect function
+  const [movies, setMovies] = useState([]);
+  const [searchState, setSearchState] = useState('');
+
+  const searchMovies = async (title) => {
+    const res = await fetch(`${API_URL}&s=${title}`);
+    const data = await res.json();
+    console.log(data.Search);
+    setMovies(data.Search);
+  }
   useEffect(() => {
-    console.log('Component mounted')
-  }, [counter])
+    searchMovies('batman');
+  }, []);
 
-  return (
+
+  return(
     <div className="App">
-      <h1>Hello, My name is {name ? name : 'NULL'}</h1>
-      {name ? (
-          <>
-            <h1>name exists</h1>
-          </>
-      ) : (
-          <>
-            <h1>name does not exist</h1>
-          </>
-      )}
-      <Person name={'Jonathan Ameri'}/>
-      <Person name={'Jonathan Ameri 2'}/>
 
-      <button onClick={() => {setCounter((prevState) => prevState - 1)}}>-</button>
-      <h1>{counter}</h1>
-      <button onClick={() => {setCounter((prevCount) => prevCount + 1)}}>+</button>
+      <h1>Movie Search App</h1>
+
+      <div className="search">
+        <input
+            placeholder={'Search for a movie...'}
+            value={searchState}
+            onChange={(event) => {
+              setSearchState(event.target.value);
+            }}
+            onKeyPress={(event) => {
+                if (event.key === 'Enter') {
+                searchMovies(searchState);
+              }
+            }}
+        />
+        <img
+            src={SearchIcon}
+            alt={'search'}
+            onClick={() => {
+              searchMovies(searchState);
+            }}
+        />
+      </div>
+
+      {
+        movies?.length > 0 ? (
+            <div className={'container'}>
+              {movies.map((movie) => (
+                  <MovieCard key={movie.imdbID} movie={movie} />
+              ))}
+
+            </div>
+        ) : (
+            <div className={'empty'}>
+                <h2>No movies found</h2>
+            </div>
+        )
+      }
 
     </div>
   );
